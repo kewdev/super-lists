@@ -15,6 +15,12 @@ class NewVisitorTest(unittest.TestCase):
         """демонтаж"""
         self.browser.quit()
 
+    def check_for_row_in_list_table(self, row_text):
+        """подтверждение наличия строки в таблице списка"""
+        table = self.browser.find_element_by_id('id_list_table')
+        rows = table.find_elements_by_tag_name('tr')
+        self.assertIn(row_text, [row.text for row in rows])
+
     def test_can_start_a_list_and_retrieve_it_tater(self):
         """тест: можно начать список и получить его позже"""
         # Эдит слышала про новое крутое онлайн-приложение со списком
@@ -44,8 +50,7 @@ class NewVisitorTest(unittest.TestCase):
 
         table = self.browser.find_element_by_id('id_list_table')
         rows = table.find_elements_by_tag_name('tr')
-        self.assertIn('1: Купить павлиньи перья', [row.text for row in rows],
-                      f'Новый элемент списка не появился в таблице. Содержимым было \n {table.text}')
+        self.check_for_row_in_list_table('1: Купить павлиньи перья')
 
         # Текстовое поле по-прежнему приглашает её добавить ещё один элемент.
         # Она вводит "Сделать мушку из павлиньих переьев"
@@ -60,8 +65,8 @@ class NewVisitorTest(unittest.TestCase):
 
         table = self.browser.find_element_by_id('id_list_table')
         rows = table.find_elements_by_tag_name('tr')
-        self.assertIn('1: Купить павлиньи перья', [row.text for row in rows])
-        self.assertIn('2: Сделать мушку из павлиньих переьев', [row.text for row in rows])
+        self.check_for_row_in_list_table('1: Купить павлиньи перья')
+        self.check_for_row_in_list_table('2: Сделать мушку из павлиньих переьев')
 
         # Эдит интересно, запомнит ли сайт её список. Далее она видит, что
         # сайт сгенерировал для неё уникальный URL-адрес - об этом

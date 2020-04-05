@@ -8,12 +8,6 @@ from lists.models import Item
 class HomePageTest(TestCase):
     """Тест домашней страницы"""
 
-    def test_root_url_resolves_to_home_page_view(self):
-        """тест: корневой url преобразуется в представление
-         домашней страницы"""
-        found = resolve('/')
-        self.assertEqual(found.func, home_page)
-
     def test_uses_home_template(self):
         """тест: используется домашний шаблон"""
         response = self.client.get('/')
@@ -30,21 +24,11 @@ class HomePageTest(TestCase):
     def test_redirect_after_POST(self):
         response = self.client.post('/', data={'item_text': 'A new list item'})
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['location'], '/')
+        self.assertEqual(response['location'], '/lists/one-of-a-kind-list-in-the-world/')
 
     def test_only_saves_items_when_necessary(self):
         self.client.get('/')
         self.assertEqual(Item.objects.count(), 0)
-
-    def test_display_all_list_items(self):
-        """тест: отображаются все элементы списка"""
-        Item.objects.create(text='itemey 1')
-        Item.objects.create(text='itemey 2')
-
-        responce = self.client.get('/')
-
-        self.assertIn('itemey 1', responce.content.decode())
-        self.assertIn('itemey 2', responce.content.decode())
 
 
 class ItemModelTest(TestCase):
@@ -65,3 +49,20 @@ class ItemModelTest(TestCase):
         second_saved_item = saved_items[1]
         self.assertEqual(first_saved_item.text, 'The first (ever) list item')
         self.assertEqual(second_saved_item.text, 'Item the second')
+
+
+class ListViewTest(TestCase):
+    def test_display_all_list_items(self):
+        """тест: отображаются все элементы списка"""
+        Item.objects.create(text='itemey 1')
+        Item.objects.create(text='itemey 2')
+
+        responce = self.client.get('/lists/one-of-a-kind-list-in-the-world/')
+
+        self.assertContains(responce, 'itemey 1')
+        self.assertContains(responce, 'itemey 2')
+
+    def test_uses_list_template(self):
+        """тест: используется шаблон списка"""
+        response = self.client.get('/lists/one-of-a-kind-list-in-the-world/')
+        self.assertTemplateUsed(response, 'list.html')
